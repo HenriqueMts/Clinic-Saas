@@ -1,5 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -21,8 +23,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-
-const registerchema = z.object({
+import { authClient } from "@/lib/auth-client";
+const registerSchema = z.object({
   name: z.string().trim().min(1, { message: "Nome é obrigatório" }).max(50),
   email: z
     .string()
@@ -36,8 +38,9 @@ const registerchema = z.object({
 });
 
 const SignUpForm = () => {
-  const form = useForm<z.infer<typeof registerchema>>({
-    resolver: zodResolver(registerchema),
+  const router = useRouter();
+  const form = useForm<z.infer<typeof registerSchema>>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -45,9 +48,21 @@ const SignUpForm = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof registerchema>) => {
-    console.log(values);
-  };
+  async function onSubmit(values: z.infer<typeof registerSchema>) {
+    await authClient.signUp.email(
+      {
+        email: values.email,
+        password: values.password,
+        name: values.name,
+      },
+      {
+        onSuccess: () => {
+          router.push("/dashboard");
+        },
+      },
+    );
+  }
+
   return (
     <Card>
       <Form {...form}>
@@ -77,13 +92,12 @@ const SignUpForm = () => {
                 <FormItem>
                   <FormLabel>E-mail</FormLabel>
                   <FormControl>
-                    <Input placeholder="Digite seu nome" {...field} />
+                    <Input placeholder="Digite seu email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="password"
@@ -91,16 +105,35 @@ const SignUpForm = () => {
                 <FormItem>
                   <FormLabel>Senha</FormLabel>
                   <FormControl>
-                    <Input placeholder="Digite sua senha" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="Digite sua senha"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            {form.formState.errors.root && (
+              <p
+                className={`text-sm ${form.formState.errors.root.type === "success" ? "text-green-500" : "text-red-500"}`}
+              >
+                {form.formState.errors.root.message}
+              </p>
+            )}
           </CardContent>
           <CardFooter>
-            <Button className="w-full cursor-pointer" type="submit">
-              Criar Conta
+            <Button
+              className="w-full cursor-pointer"
+              type="submit"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                "Criar Conta"
+              )}
             </Button>
           </CardFooter>
         </form>
