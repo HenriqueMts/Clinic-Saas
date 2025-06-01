@@ -7,9 +7,9 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
-import { CardContent } from "@/components/ui/card";
 import {
   Card,
+  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
+
 const loginSchema = z.object({
   email: z
     .string()
@@ -107,7 +108,7 @@ const LoginForm = () => {
           </CardContent>
           <CardFooter>
             <Button
-              className="w-full cursor-pointer"
+              className="w-full"
               type="submit"
               disabled={form.formState.isSubmitting}
             >

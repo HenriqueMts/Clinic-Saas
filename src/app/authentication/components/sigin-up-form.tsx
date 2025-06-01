@@ -7,9 +7,9 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
-import { CardContent } from "@/components/ui/card";
 import {
   Card,
+  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -134,7 +134,7 @@ const SignUpForm = () => {
           </CardContent>
           <CardFooter>
             <Button
-              className="w-full cursor-pointer"
+              className="w-full"
               type="submit"
               disabled={form.formState.isSubmitting}
             >
