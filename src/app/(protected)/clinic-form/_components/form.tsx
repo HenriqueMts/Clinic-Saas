@@ -1,12 +1,13 @@
 "use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import z from "zod";
+import { z } from "zod";
 
-import { createClinic } from "@/app/actions/create-clinic";
+import { createClinic } from "@/actions/create-clinic";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import {
@@ -20,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 const clinicFormSchema = z.object({
-  name: z.string().trim().min(1, { message: "Nome da clínica é obrigatório" }),
+  name: z.string().trim().min(1, { message: "Nome é obrigatório" }),
 });
 
 const ClinicForm = () => {
@@ -31,19 +32,20 @@ const ClinicForm = () => {
     },
   });
 
-  async function onSubmit(data: z.infer<typeof clinicFormSchema>) {
+  const onSubmit = async (data: z.infer<typeof clinicFormSchema>) => {
     try {
       await createClinic(data.name);
     } catch (error) {
       if (isRedirectError(error)) {
         return;
-      } else {
-        toast.error("Erro ao criar clínica");
       }
+      console.error(error);
+      toast.error("Erro ao criar clínica.");
     }
-  }
+  };
+
   return (
-    <div>
+    <>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
@@ -51,7 +53,7 @@ const ClinicForm = () => {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nome da Clínica</FormLabel>
+                <FormLabel>Nome</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -61,17 +63,16 @@ const ClinicForm = () => {
           />
 
           <DialogFooter>
-            <Button disabled={form.formState.isSubmitting} type="submit">
-              {form.formState.isSubmitting ? (
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting && (
                 <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Criar Clínica"
               )}
+              Criar clínica
             </Button>
           </DialogFooter>
         </form>
       </Form>
-    </div>
+    </>
   );
 };
 

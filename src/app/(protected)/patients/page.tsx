@@ -26,15 +26,12 @@ const PatientsPage = async () => {
   if (!session?.user) {
     redirect("/authentication");
   }
-
   if (!session.user.clinic) {
     redirect("/clinic-form");
   }
-
   const patients = await db.query.patientsTable.findMany({
     where: eq(patientsTable.clinicId, session.user.clinic.id),
   });
-
   return (
     <PageContainer>
       <PageHeader>
@@ -49,7 +46,7 @@ const PatientsPage = async () => {
         </PageActions>
       </PageHeader>
       <PageContent>
-        <DataTable columns={patientsTableColumns} data={patients} />
+        <DataTable data={patients} columns={patientsTableColumns} />
       </PageContent>
     </PageContainer>
   );

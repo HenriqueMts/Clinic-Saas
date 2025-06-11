@@ -17,7 +17,6 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      enabled: true,
     },
   },
   plugins: [
@@ -28,8 +27,8 @@ export const auth = betterAuth({
           clinic: true,
         },
       });
+      // TODO: Ao adaptar para o usuário ter múltiplas clínicas, deve-se mudar esse código
       const clinic = clinics?.[0];
-
       return {
         user: {
           ...user,

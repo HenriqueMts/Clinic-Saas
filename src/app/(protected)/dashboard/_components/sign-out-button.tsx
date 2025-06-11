@@ -1,4 +1,5 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,9 @@ const SignOutButton = () => {
       onClick={() =>
         authClient.signOut({
           fetchOptions: {
-            onSuccess: () => router.push("/authentication"),
+            onSuccess: () => {
+              router.push("/authentication");
+            },
           },
         })
       }

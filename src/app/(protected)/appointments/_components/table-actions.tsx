@@ -2,10 +2,9 @@
 
 import { MoreVerticalIcon, TrashIcon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { useState } from "react";
 import { toast } from "sonner";
 
-import { deleteAppointment } from "@/app/actions/delete-appointment";
+import { deleteAppointment } from "@/actions/delete-appointment";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,6 +14,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,70 +27,80 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { appointmentsTable } from "@/db/schema";
 
-type Appointment = typeof appointmentsTable.$inferSelect;
+type AppointmentWithRelations = typeof appointmentsTable.$inferSelect & {
+  patient: {
+    id: string;
+    name: string;
+    email: string;
+    phoneNumber: string;
+    sex: "male" | "female";
+  };
+  doctor: {
+    id: string;
+    name: string;
+    specialty: string;
+  };
+};
 
-const AppointmentTableActions = ({
+interface AppointmentsTableActionsProps {
+  appointment: AppointmentWithRelations;
+}
+
+const AppointmentsTableActions = ({
   appointment,
-}: {
-  appointment: Appointment;
-}) => {
-  const [deleteDialogIsOpen, setDeleteDialogIsOpen] = useState(false);
-
+}: AppointmentsTableActionsProps) => {
   const deleteAppointmentAction = useAction(deleteAppointment, {
     onSuccess: () => {
-      toast.success("Consulta cancelada com sucesso.");
-      setDeleteDialogIsOpen(false);
+      toast.success("Agendamento deletado com sucesso.");
     },
-    onError: (error) => {
-      toast.error(error.error.serverError || "Erro ao cancelar consulta.");
+    onError: () => {
+      toast.error("Erro ao deletar agendamento.");
     },
   });
 
+  const handleDeleteAppointmentClick = () => {
+    if (!appointment) return;
+    deleteAppointmentAction.execute({ id: appointment.id });
+  };
+
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <MoreVerticalIcon className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuLabel>Consultas</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-
-          <DropdownMenuItem onClick={() => setDeleteDialogIsOpen(true)}>
-            <TrashIcon className="mr-2 h-4 w-4" />
-            Cancelar Consulta
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <AlertDialog
-        open={deleteDialogIsOpen}
-        onOpenChange={setDeleteDialogIsOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Cancelar consulta</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja cancelar a consulta? Esta ação não pode ser
-              desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() =>
-                deleteAppointmentAction.execute({ id: appointment.id })
-              }
-            >
-              Confirmar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+    <DropdownMenu>
+      <DropdownMenuTrigger>
+        <Button variant="ghost" size="icon">
+          <MoreVerticalIcon className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuLabel>{appointment.patient.name}</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+              <TrashIcon />
+              Excluir
+            </DropdownMenuItem>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Tem certeza que deseja deletar esse agendamento?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Essa ação não pode ser revertida. Isso irá deletar o agendamento
+                permanentemente.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteAppointmentClick}>
+                Deletar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
-export default AppointmentTableActions;
+export default AppointmentsTableActions;

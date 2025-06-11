@@ -8,7 +8,8 @@ import { PatternFormat } from "react-number-format";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { upsertPatient } from "@/app/actions/upsert-patient";
+import { upsertPatient } from "@/actions/upsert-patient";
+import { Button } from "@/components/ui/button";
 import {
   DialogContent,
   DialogDescription,
@@ -41,10 +42,10 @@ const formSchema = z.object({
   email: z.string().email({
     message: "Email inválido.",
   }),
-  phone: z.string().min(1, {
-    message: "Telefone é obrigatório.",
+  phoneNumber: z.string().trim().min(1, {
+    message: "Número de telefone é obrigatório.",
   }),
-  gender: z.enum(["MASCULINO", "FEMININO"], {
+  sex: z.enum(["male", "female"], {
     required_error: "Sexo é obrigatório.",
   }),
 });
@@ -56,9 +57,9 @@ interface UpsertPatientFormProps {
 }
 
 const UpsertPatientForm = ({
-  isOpen,
   patient,
   onSuccess,
+  isOpen,
 }: UpsertPatientFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     shouldUnregister: true,
@@ -66,29 +67,24 @@ const UpsertPatientForm = ({
     defaultValues: {
       name: patient?.name ?? "",
       email: patient?.email ?? "",
-      phone: patient?.phoneNumber ?? "",
-      gender: patient?.sex === "male" ? "MASCULINO" : "FEMININO",
+      phoneNumber: patient?.phoneNumber ?? "",
+      sex: patient?.sex ?? undefined,
     },
   });
 
   useEffect(() => {
     if (isOpen) {
-      form.reset({
-        name: patient?.name ?? "",
-        email: patient?.email ?? "",
-        phone: patient?.phoneNumber ?? "",
-        gender: patient?.sex === "male" ? "MASCULINO" : "FEMININO",
-      });
+      form.reset(patient);
     }
   }, [isOpen, form, patient]);
 
   const upsertPatientAction = useAction(upsertPatient, {
     onSuccess: () => {
-      toast.success("Paciente adicionado com sucesso.");
+      toast.success("Paciente salvo com sucesso.");
       onSuccess?.();
     },
     onError: () => {
-      toast.error("Erro ao adicionar paciente.");
+      toast.error("Erro ao salvar paciente.");
     },
   });
 
@@ -118,9 +114,12 @@ const UpsertPatientForm = ({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nome</FormLabel>
+                <FormLabel>Nome do paciente</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input
+                    placeholder="Digite o nome completo do paciente"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -133,7 +132,11 @@ const UpsertPatientForm = ({
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input {...field} type="email" />
+                  <Input
+                    type="email"
+                    placeholder="exemplo@email.com"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -141,18 +144,19 @@ const UpsertPatientForm = ({
           />
           <FormField
             control={form.control}
-            name="phone"
+            name="phoneNumber"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Telefone</FormLabel>
+                <FormLabel>Número de telefone</FormLabel>
                 <FormControl>
                   <PatternFormat
+                    format="(##) #####-####"
+                    mask="_"
+                    placeholder="(11) 99999-9999"
                     value={field.value}
                     onValueChange={(value) => {
                       field.onChange(value.value);
                     }}
-                    format="(##) #####-####"
-                    mask="_"
                     customInput={Input}
                   />
                 </FormControl>
@@ -162,7 +166,7 @@ const UpsertPatientForm = ({
           />
           <FormField
             control={form.control}
-            name="gender"
+            name="sex"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Sexo</FormLabel>
@@ -171,25 +175,27 @@ const UpsertPatientForm = ({
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione o sexo" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="MASCULINO">Masculino</SelectItem>
-                    <SelectItem value="FEMININO">Feminino</SelectItem>
+                    <SelectItem value="male">Masculino</SelectItem>
+                    <SelectItem value="female">Feminino</SelectItem>
                   </SelectContent>
                 </Select>
+                <FormMessage />
               </FormItem>
             )}
           />
           <DialogFooter>
-            <button
+            <Button
               type="submit"
-              className="bg-primary text-primary-foreground ring-offset-background hover:bg-primary/90 focus-visible:ring-ring inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+              disabled={upsertPatientAction.isPending}
+              className="w-full"
             >
-              {patient ? "Salvar" : "Adicionar"}
-            </button>
+              {upsertPatientAction.isPending ? "Salvando..." : "Salvar"}
+            </Button>
           </DialogFooter>
         </form>
       </Form>

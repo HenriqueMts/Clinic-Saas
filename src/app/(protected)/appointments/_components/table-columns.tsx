@@ -6,48 +6,72 @@ import { ptBR } from "date-fns/locale";
 
 import { appointmentsTable } from "@/db/schema";
 
-import AppointmentTableActions from "./table-actions";
+import AppointmentsTableActions from "./table-actions";
 
-type Appointment = typeof appointmentsTable.$inferSelect & {
-  patientName: string;
-  doctorName: string;
+type AppointmentWithRelations = typeof appointmentsTable.$inferSelect & {
+  patient: {
+    id: string;
+    name: string;
+    email: string;
+    phoneNumber: string;
+    sex: "male" | "female";
+  };
+  doctor: {
+    id: string;
+    name: string;
+    specialty: string;
+  };
 };
 
-export const appointmentsTableColumns: ColumnDef<Appointment>[] = [
+export const appointmentsTableColumns: ColumnDef<AppointmentWithRelations>[] = [
   {
-    id: "patientName",
-    accessorKey: "patientName",
+    id: "patient",
+    accessorKey: "patient.name",
     header: "Paciente",
   },
   {
-    id: "doctorName",
-    accessorKey: "doctorName",
+    id: "doctor",
+    accessorKey: "doctor.name",
     header: "Médico",
+    cell: (params) => {
+      const appointment = params.row.original;
+      return `${appointment.doctor.name}`;
+    },
   },
   {
     id: "date",
     accessorKey: "date",
-    header: "Data",
+    header: "Data e Hora",
     cell: (params) => {
-      const date = params.row.original.date;
-      return format(date, "dd/MM/yyyy", { locale: ptBR });
+      const appointment = params.row.original;
+      return format(new Date(appointment.date), "dd/MM/yyyy 'às' HH:mm", {
+        locale: ptBR,
+      });
     },
   },
   {
-    id: "time",
-    accessorKey: "time",
-    header: "Horário",
+    id: "specialty",
+    accessorKey: "doctor.specialty",
+    header: "Especialidade",
+  },
+  {
+    id: "price",
+    accessorKey: "appointmentPriceInCents",
+    header: "Valor",
     cell: (params) => {
-      const date = params.row.original.date;
-      return format(date, "HH:mm", { locale: ptBR });
+      const appointment = params.row.original;
+      const price = appointment.appointmentPriceInCents / 100;
+      return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(price);
     },
   },
   {
     id: "actions",
-    header: "Ações",
     cell: (params) => {
       const appointment = params.row.original;
-      return <AppointmentTableActions appointment={appointment} />;
+      return <AppointmentsTableActions appointment={appointment} />;
     },
   },
 ];

@@ -31,6 +31,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth-client";
+
 const items = [
   {
     title: "Dashboard",
@@ -71,17 +72,11 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="border-b p-4">
-        <Image
-          src="/logo.svg"
-          alt="logo"
-          width={0}
-          height={0}
-          className="h-7 w-7"
-        />
+        <Image src="/logo.svg" alt="Doutor Agenda" width={136} height={28} />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Menu principal</SidebarGroupLabel>
+          <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -108,10 +103,10 @@ export function AppSidebar() {
                     <AvatarFallback>F</AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="test-sm">
+                    <p className="text-sm">
                       {session.data?.user?.clinic?.name}
                     </p>
-                    <p className="test-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {session.data?.user.email}
                     </p>
                   </div>
@@ -120,7 +115,7 @@ export function AppSidebar() {
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut />
-                  <span>Sair</span>
+                  Sair
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

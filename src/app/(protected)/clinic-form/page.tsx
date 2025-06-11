@@ -10,20 +10,17 @@ import ClinicForm from "./_components/form";
 
 const ClinicFormPage = () => {
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-black">
-      <Dialog open={true}>
-        <form>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Crie sua Clínica</DialogTitle>
-              <DialogDescription>
-                Adicione uma clínica para continuar
-              </DialogDescription>
-            </DialogHeader>
-
-            <ClinicForm />
-          </DialogContent>
-        </form>
+    <div>
+      <Dialog open>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Adicionar clínica</DialogTitle>
+            <DialogDescription>
+              Adicione uma clínica para continuar.
+            </DialogDescription>
+          </DialogHeader>
+          <ClinicForm />
+        </DialogContent>
       </Dialog>
     </div>
   );
