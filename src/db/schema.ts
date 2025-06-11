@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   boolean,
+  date,
   integer,
   pgEnum,
   pgTable,
@@ -184,7 +185,7 @@ export const appointmentsTable = pgTable("appointments", {
     .$onUpdate(() => new Date()),
 });
 
-export const appointmentsTableRelations = relations(
+export const appointmentsRelations = relations(
   appointmentsTable,
   ({ one }) => ({
     clinic: one(clinicsTable, {
